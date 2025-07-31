@@ -606,11 +606,11 @@ Final Result :
 #### Spice extraction of inverter in magic 
 
 - Clone vsdstdcelldesign. Copy the techfile ```sky130A.tech``` from ```pdks/sky130A/libs.tech/magic/``` to directory of the cloned repo. 
-  <img width="848" height="52" alt="Screenshot 2025-07-26 174607" src="https://github.com/user-attachments/assets/b185ee77-7baf-4d9d-a14e-8f3ce328d139" />
-  <img width="848" height="168" alt="Screenshot 2025-07-30 125827" src="https://github.com/user-attachments/assets/73cde73d-b8ce-40b6-b346-73d279bccbc6" />
+  <img width="848" height="52" alt="11.png" src="https://raw.githubusercontent.com/athul-rai/Digital-VLSI-SoC-Openlane-sky130A/main/Day3/11.png" />
+  <img width="848" height="168" alt="12.png" src="https://raw.githubusercontent.com/athul-rai/Digital-VLSI-SoC-Openlane-sky130A/main/Day3/12.png" />
 
 - View the mag file using magic ```magic -T sky130A.tech sky130_inv.mag &```
-  <img width="848" height="57" alt="Screenshot 2025-07-26 174719" src="https://github.com/user-attachments/assets/144921cd-5e35-4c8b-9918-89460b008333" />
+  <img width="848" height="57" alt="13.png" src="https://raw.githubusercontent.com/athul-rai/Digital-VLSI-SoC-Openlane-sky130A/main/Day3/13.png" />
   
 - Make an extract file ```.ext``` by typing extract all in the tkon terminal of magic. 
 
@@ -627,7 +627,7 @@ Final Result :
   
   <img width="848" height="875" alt="Screenshot 2025-07-26 181256" src="https://github.com/user-attachments/assets/6b11a52d-e7dd-4626-882e-e8d24f331810" />
 
-  <img width="848" height="487" alt="Screenshot 2025-07-26 181156" src="https://github.com/user-attachments/assets/fa7d1c08-da3b-4118-83f7-42ff78559790" />
+  <img width="848" height="487" alt="Screenshot 2025-07-31 160022" src="https://raw.githubusercontent.com/athul-rai/Digital-VLSI-SoC-Openlane-sky130A/main/Day3/Screenshot%202025-07-31%20160022.png" />
 
   
 #### Slew rate and Propagation delay 
