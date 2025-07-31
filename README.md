@@ -175,7 +175,8 @@ The task is to find the flip-flop ratio ratio for the design picorv32a. This is 
  - % flow.tcl -interactive = run script for automating the whole RTL to GDSII flow but in step by step -interactive mode
  - % package require openlane 0.9 == retrives all dependencies for running v0.9 of OpenLANE  
  
- ![image](https://user-images.githubusercontent.com/87559347/182833010-c5b32449-bfa1-42d0-8433-9edfdefbf1f6.png)
+ ![GDS Layout](https://raw.githubusercontent.com/athul-rai/Digital-VLSI-SoC-Openlane-sky130A/main/Day1/Screenshot%202025-07-31%20123740.png)
+
 
  
 *2. Design Setup Stage:*
