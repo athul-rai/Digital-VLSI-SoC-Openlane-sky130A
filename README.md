@@ -323,7 +323,8 @@ In Order to fix negetive slack we change the clock period to ```55.00``` in ```s
 
   ```magic -T /home/vsduser/Desktop/work/tools/openlane_working_dir/pdks/sky130A/libs.tech/magic/sky130A.tech lef read ../../tmp/merged.lef def read picorv32a.floorplan.def &```
   
-  <img width="848" height="37" alt="Screenshot 2025-07-24 134349" src="https://github.com/user-attachments/assets/40cb2aba-9fc6-43e8-a196-1216bfb0aa48" />
+  <img src="https://raw.githubusercontent.com/athul-rai/Digital-VLSI-SoC-Openlane-sky130A/main/Day2/floorplan.png" width="800" alt="Floorplan"/>
+
 
   *Result* : 
 
@@ -331,11 +332,11 @@ In Order to fix negetive slack we change the clock period to ```55.00``` in ```s
 
   To center the view, press "s" to select whole die then press "v" to center the view. Point the cursor to a cell then press "s" to select it, zoom into it by pressing 'z". Type "what" in tkcon to display          information of selected object. These objects might be IO pin, decap cell, or well taps as shown below.
 
-  <img width="848" height="907" alt="Screenshot 2025-07-24 133602" src="https://github.com/user-attachments/assets/c546ebab-bfb0-4631-9967-62575694aa4a" />
+  <img width="848" height="907" alt="1.png" src="https://raw.githubusercontent.com/athul-rai/Digital-VLSI-SoC-Openlane-sky130A/main/Day2/1.png" />
   
   if we zoom, we can see that some of the micro, IO pad, and tap-cells have been placed appropriately.
 
-  <img width="848" height="668" alt="Screenshot 2025-07-24 133654" src="https://github.com/user-attachments/assets/770e1f71-f57d-44e4-b710-31d5bbab4fac" />
+  <img width="848" height="668" alt="2.png" src="https://raw.githubusercontent.com/athul-rai/Digital-VLSI-SoC-Openlane-sky130A/main/Day2/2.png" />
   
   To get information about the selected object press ```s``` and type ```what``` in console - same as in the above image
 
@@ -347,13 +348,13 @@ In Order to fix negetive slack we change the clock period to ```55.00``` in ```s
 
   ```magic -T /home/vsduser/Desktop/work/tools/openlane_working_dir/pdks/sky130A/libs.tech/magic/sky130A.tech lef read ../../tmp/merged.lef def read picorv32a.placement.def &```
 
-  <img width="848" height="42" alt="Screenshot 2025-07-24 134409" src="https://github.com/user-attachments/assets/35373e18-0d02-4666-9629-b5e8f4adcdc3" />
+  <img width="848" height="42" alt="placement" src="https://raw.githubusercontent.com/athul-rai/Digital-VLSI-SoC-Openlane-sky130A/main/Day2/placement.png" />
 
   *results* :
 
-  <img width="848" height="728" alt="Screenshot 2025-07-24 134153" src="https://github.com/user-attachments/assets/10d3ff16-2da9-4f14-a763-c834a3e04b00" />
+  <img width="848" height="728" alt="3.png" src="https://raw.githubusercontent.com/athul-rai/Digital-VLSI-SoC-Openlane-sky130A/main/Day2/3.png" />
 
-  <img width="848" height="545" alt="Screenshot 2025-07-24 134259" src="https://github.com/user-attachments/assets/dc7bd71a-8625-4cd5-abad-92c53610c52d" />
+  <img width="848" height="545" alt="4.png" src="https://github.com/user-attachments/assets/dc7bd71a-8625-4cd5-abad-92c53610c52d" />
   
   If we zoom, we the core with all the standard cells placed in between power can ground rail
 
@@ -410,24 +411,6 @@ In Order to fix negetive slack we change the clock period to ```55.00``` in ```s
 
   
   <img width="848" height="603" alt="dadda" src="https://github.com/user-attachments/assets/a288d9cd-e1cc-4df1-bdf8-d5c77d97a7c4" />
-
-#### Estimation of area of the die 
-- In ```runs/<date>/results/floorplan/picorv32a.floorplan.def``` which is a design exchange format, containing the die area and positions.
-  
-  <img width="848" height="107" alt="Screenshot 2025-07-24 132349" src="https://github.com/user-attachments/assets/472471ea-1a17-4a3b-8d65-77c46b1f1ffb" />
-
-
-  ```
-  DESIGN picorv32a ;
-  UNITS DISTANCE MICRONS 1000 ;
-  DIEAREA ( 0 0 ) ( 660685 671405 ) ;
-  ```
-
-  <img width="848" height="592" alt="Screenshot 2025-07-24 132311" src="https://github.com/user-attachments/assets/2cdf5fe9-7670-4eb5-a1dd-8c9a8d98e253" />
-
-  The die area here is in database units and 1 micron is equivalent to 1000 database units. Thus area of the die is (660685/1000)microns*(671405/1000)microns = 443587 microns squared.
-
-
 # Day 3
 # Design a Library Cell using Magic Layout and Ngspice Characterization
 
