@@ -5,7 +5,7 @@ This project documents the complete physical design (PD) flow for a `picorv32a` 
 
 OpenLANE orchestrates a suite of powerful EDA tools—including Yosys, OpenROAD, Magic, and Netgen—to automate the entire flow, from logic synthesis to final layout generation, enabling the efficient creation of hard macros and full chip designs.
 
-# DAY-1
+# Day 1
 ## Introduction, Openlane, Sky130A PDK and synthesis
 
 we explore the fundamental physical elements of an integrated circuit (IC) : The following topics are addresed:
