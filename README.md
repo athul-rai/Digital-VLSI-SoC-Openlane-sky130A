@@ -568,13 +568,13 @@ The following topics are addresed:
     
     <img width="848" height="497" alt="Post-Layout Simulation Results" src="https://github.com/athul-rai/Digital-VLSI-SoC-Openlane-sky130A/blob/main/Day4/123.png?raw=true" />
 
-    <img width="848" height="921" alt="Screenshot 2025-07-28 223452" src="https://github.com/user-attachments/assets/354f77d9-484b-4fc9-82db-f98ba83e714f" />
+    <img width="848" height="921" alt="Final Layout or LVS Summary" src="https://github.com/athul-rai/Digital-VLSI-SoC-Openlane-sky130A/blob/main/Day4/124.png?raw=true" />
 
 - run floorplan
 
-  <img width="1847" height="1200" alt="Screenshot 2025-07-28 225444" src="https://github.com/user-attachments/assets/2e5e7292-a69f-4646-9e8a-3f35f27d626a" />
+ <img width="1847" height="1200" alt="Overall Project Flow or Dashboard" src="https://github.com/athul-rai/Digital-VLSI-SoC-Openlane-sky130A/blob/main/Day4/125.png?raw=true" />
 
-  <img width="1832" height="245" alt="Screenshot 2025-07-30 124909" src="https://github.com/user-attachments/assets/cd4713c1-b98b-4fcd-b906-30b1b344b2a8" />
+  <img width="1832" height="245" alt="OpenLane Flow Completion Banner" src="https://github.com/athul-rai/Digital-VLSI-SoC-Openlane-sky130A/blob/main/Day4/126.png?raw=true" />
 
 - Post-Synthesis timing analysis
 
@@ -584,51 +584,50 @@ The following topics are addresed:
 
   First we do is running the synthesis --> include newly added lef to openlane flow --> set ::env(SYNTH_SIZING) 1 --> set                ::env(SYNTH_MAX_FANOUT) 4 --> run_synthesis
 
-  <img width="1848" height="902" alt="Screenshot 2025-07-31 191742" src="https://github.com/user-attachments/assets/3d42043d-4758-4577-ae4b-c14846e44257" />
+ <img width="1832" height="245" alt="Final Report or Summary Chart" src="https://github.com/athul-rai/Digital-VLSI-SoC-Openlane-sky130A/blob/main/Day4/127.png?raw=true" />
   
 
   Later in `cd Desktop/work/tools/openlane_working_dir/openlane` we write command `sta pre_sta.conf`
 
   *sta pre_sta.conf*
-  <img width="1838" height="901" alt="Screenshot 2025-07-31 211105" src="https://github.com/user-attachments/assets/ee021675-c15d-46ad-b587-43b0a22ccf3f" />
+  <img width="1838" height="901" alt="Final OpenLane Run Summary or Analysis" src="https://github.com/athul-rai/Digital-VLSI-SoC-Openlane-sky130A/blob/main/Day4/128.png?raw=true" />
 
   *my_base.sdc*
-  <img width="1832" height="891" alt="Screenshot 2025-07-31 211155" src="https://github.com/user-attachments/assets/2c6e2506-2d8f-4049-ad3a-d95f4fafeec8" />
+  <img width="1832" height="891" alt="OpenLane Final Output Summary or Metrics" src="https://github.com/athul-rai/Digital-VLSI-SoC-Openlane-sky130A/blob/main/Day4/129.png?raw=true" />
 
-  <img width="1433" height="756" alt="Screenshot 2025-07-31 191954" src="https://github.com/user-attachments/assets/0893743c-bb30-450a-9620-e1d8b62fa90b" />
-
-  <img width="1817" height="908" alt="Screenshot 2025-07-31 192011" src="https://github.com/user-attachments/assets/b17625a1-252e-4413-befd-2b22a3379632" />
+  <img width="1433" height="756" alt="OpenLane Design Completion Logs or Report" src="https://github.com/athul-rai/Digital-VLSI-SoC-Openlane-sky130A/blob/main/Day4/130.png?raw=true" />
+  
+  <img width="1817" height="908" alt="Final OpenLane Run Output or Summary Table" src="https://github.com/athul-rai/Digital-VLSI-SoC-Openlane-sky130A/blob/main/Day4/131.png?raw=true" />
 
   Replacing some cells to reduce slack
 
-  <img width="1855" height="437" alt="Screenshot 2025-07-31 202908" src="https://github.com/user-attachments/assets/73c52399-6aae-4cce-bd09-1e93e5eadfda" />
+  <img width="1855" height="437" alt="OpenLane Report Summary or Final Output" src="https://github.com/athul-rai/Digital-VLSI-SoC-Openlane-sky130A/blob/main/Day4/132.png?raw=true" />
 
   report_net -connections _11672_ [we see the driver pins] 
-  <img width="1857" height="910" alt="Screenshot 2025-07-31 203237" src="https://github.com/user-attachments/assets/5f8240b5-57a3-4f99-84f6-3ab736b991f4" />
+  <img width="1857" height="910" alt="OpenLane Timing Analysis Report" src="https://github.com/athul-rai/Digital-VLSI-SoC-Openlane-sky130A/blob/main/Day4/133.png?raw=true" />
 
   replace_cell _14510_ sky130_fd_sc_hd__or3_4 [we replace some cells with better suited ones for driving 4 fanouts]
-  <img width="1847" height="921" alt="Screenshot 2025-07-31 203516" src="https://github.com/user-attachments/assets/affa5a5a-3594-4d79-9f75-0cf3bf84f6e7" />
+  <img width="1847" height="921" alt="OpenLane Power Analysis Report" src="https://github.com/athul-rai/Digital-VLSI-SoC-Openlane-sky130A/blob/main/Day4/134.png?raw=true" />
 
   To check the report and see the changes in slack we use command : report_checks -fields {net cap slew input_pins} -digits 4
 
   Slack reduced
 
-  <img width="1841" height="905" alt="Screenshot 2025-07-31 203603" src="https://github.com/user-attachments/assets/38e44c1a-927a-47ec-8eec-e10d63772ddc" />
+ <img width="1841" height="905" alt="OpenLane Power Report Details" src="https://github.com/athul-rai/Digital-VLSI-SoC-Openlane-sky130A/blob/main/Day4/135.png?raw=true" />
 
   report_checks -from _29052_ -to _30440_ -through _14510_
-  <img width="1842" height="912" alt="Screenshot 2025-07-31 204342" src="https://github.com/user-attachments/assets/747b907d-20f5-44fa-9665-31cadfd64629" />
+  <img width="1842" height="912" alt="OpenLane Detailed Report" src="https://github.com/athul-rai/Digital-VLSI-SoC-Openlane-sky130A/blob/main/Day4/136.png?raw=true" />
 
-  <img width="1852" height="916" alt="Screenshot 2025-07-31 204533" src="https://github.com/user-attachments/assets/5e3f3cc8-b68e-4948-909c-57ace47adec3" />
+  <img width="1852" height="916" alt="OpenLane Power and Timing Summary" src="https://github.com/athul-rai/Digital-VLSI-SoC-Openlane-sky130A/blob/main/Day4/137.png?raw=true" />
 
   report_net -connections _11668_
   
   replace_cell _14506_ sky130_fd_sc_hd__or4_4
 
-  <img width="1855" height="645" alt="Screenshot 2025-07-31 205421" src="https://github.com/user-attachments/assets/bb689f1d-315f-476a-8b97-14916f3b0c5e" />
+  <img width="1855" height="645" alt="OpenLane Power Consumption Graph" src="https://github.com/athul-rai/Digital-VLSI-SoC-Openlane-sky130A/blob/main/Day4/138.png?raw=true" />
 
   Slack Reduced
-
-  <img width="1853" height="880" alt="Screenshot 2025-07-31 205436" src="https://github.com/user-attachments/assets/6610dbe3-72fb-4f44-ac34-efcfef1c67b7" />
+  <img width="1853" height="880" alt="OpenLane Timing and Power Analysis" src="https://github.com/athul-rai/Digital-VLSI-SoC-Openlane-sky130A/blob/main/Day4/139.png?raw=true" />
 
   Intially : -23.90
   
