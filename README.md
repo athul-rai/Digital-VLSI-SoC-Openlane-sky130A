@@ -1,176 +1,24 @@
-## Physical Design using OpenLANE & Sky130 PDK
+# VSD SoC Design and Planning Workshop
 
-## 📘 Project Introduction
+##  Project Introduction
 This project documents the complete physical design (PD) flow for a `picorv32a` RISC-V core, from RTL to a final GDSII layout. It leverages the fully automated, open-source **OpenLANE** framework and the **Skywater 130nm (Sky130) PDK**. This work was completed as part of the Digital VLSI SoC Design and Planning Workshop by VLSI System Design (VSD) Corp, providing a practical, hands-on journey through the entire chip implementation process.
 
 OpenLANE orchestrates a suite of powerful EDA tools—including Yosys, OpenROAD, Magic, and Netgen—to automate the entire flow, from logic synthesis to final layout generation, enabling the efficient creation of hard macros and full chip designs.
 
-
-
-
-## 📁 Repository Structure
-
-- [DAY 1](#DAY-1)
-  - [Theory](#DAY-1)
-    - [Introduction to RISC-V](#Introduction-to-RISC-V)
-    - [Simplified RTL to GDSII Flow](#Simplified-RTL-to-GDSII-Flow)
-    - [OpenLane Flow](#OpenLane-Flow)
-  - [Lab](#Lab-1)
-    - [Synthesis](#Lab-1)
-    - [Estimation of Flip Flop Ratio](#Estimation-of-Flip-Flop-Ratio)
-    - [Slack](#Slack)
-      
-- [DAY 2](#Day-2)
-  - [Theory](#DAY-2)
-    - [Floorplan](#Floorplan)
-    - [Placement](#Placement)
-  - [Lab](#Lab-2)
-    - [Floorplan](#Floor-Plan)
-    - [Placement](#Place-Ment)
-    - [Characterization](#Library-Characterization)
-    - [Estimation of area of the die](#Estimation-of-area-of-the-die)
-      
-- [Day 3](#DAY-3)
-  - [Theory](#DAY-3)
-    - [Designing a Library Cell](#Designing-a-Library-Cell)
-    - [steps for simulation in ngspice](#Follow-these-steps-for-simulation-in-ngspice)
-    - [SPICE Switching Threshold and Propagation Delay](#SPICE-Switching-Threshold-and-Propagation-Delay)
-    - [16-Mask CMOS Process](#16-Mask-CMOS-Process)
-  - [Lab](#Lab-3)
-    - [Spice extraction of inverter in magic](#Spice-extraction-of-inverter-in-magic)
-    - [Post-Layout Spice simulation (ngspice)](#Post-Layout-Spice-simulation-(ngspice))
-    - [Fix Tech File DRC via Magic](#Fix-Tech-File-DRC-via-Magic)
-      
-- [DAY 4](#DAY-4)
-  - [Theory](#DAY-4)
-    - [Delay Table](#Delay-Table)
-    - [Timing Analysis (using Ideal Clocks)](#Timing-Analysis-(using-Ideal-Clocks))
-    - [Clock Tree Synthesis Stage](#Clock-Tree-Synthesis-Stage)
-  - [Lab](#Lab-4)
-    
-- [DAY 5](#DAY-5)
-  - [Lab](#Lab-5)
-  
-
-
 # DAY-1
-# Inception-of-Open-source-EDA,OpenLane-and-Sky130-PDK
+## Introduction, Openlane, Sky130A PDK and synthesis
 
-we explore the fundamental physical elements of an integrated circuit (IC) : 
+we explore the fundamental physical elements of an integrated circuit (IC) : The following topics are addresed:
+ How does the communication between hardware and software works?
+ RTL2GDS flow
+ Openlane flow - how the integrated tools are used for each step in IC design, directory structure, configuration files, design preparation and synthesis
 
-**Package, Chip, Pads, Core, Die, and IPs** : 
-- The QFN-48 (Quad Flat No-lead) package is a surface-mounted IC package with 48 pins used to connect the chip to the outside world.
-
-- Inside the package is the die, the actual silicon chip where transistors are fabricated.
-
-- The core is the functional part of the die where the logic (e.g., processor, memory) is implemented.
-
-- Surrounding the core are pads, which act as electrical contact points for interfacing signals from the core to the pins on the package.
-  
-- The chip as a whole includes the die, package, and connections.
-
-The core of the chip will contain two types of blocks:
-
-**Foundry IP Blocks** (e.g. ADC, DAC, PLL, and SRAM) = blocks which requires some amount of intelligent techniques to build which can only be designed by foundries.
-
-**Macro blocks** (e.g. RISC-V SOC and SPI) = pure digital logic blocks compared to IP's which might require some analog parts.
-
-<img width="848" height="853" alt="182751377-2810d388-21b0-4df1-b1d4-c72176d80d28" src="https://github.com/user-attachments/assets/d6c9f443-dc08-4587-972a-c46c9b927dad" />
-
-## Introduction to RISC-V
-
-- RISC-V stands for Reduced Instruction Set Computing – Version 5 and is designed with simplicity and modularity in mind.
-
-- Unlike proprietary ISAs like ARM or x86, RISC-V is open, meaning anyone can implement or modify it freely.
-
-- The architecture consists of a base integer set and optional extensions (e.g., for multiplication, atomic operations, floating point).
-
-- RISC-V is ideal for education, research, and industrial design due to its transparency and scalability.
-
-## Simplified RTL to GDSII Flow 
-
-*Synthesis*
-
-The Register Transfer Level (RTL) code, typically written in Verilog or VHDL, is translated into a gate-level netlist. This netlist is composed of logic gates and components from a pre-defined standard cell library. These cells have fixed sizes and electrical characteristics, provided by the Process Design Kit (PDK). During synthesis, optimizations such as constant propagation, logic simplification, and technology mapping are performed to ensure an area-efficient and logically equivalent design.
-
-*Floor Planning and Power Planning*
-
-This step involves defining the physical layout of the chip, including the die area, core area, margins, and reserved regions for IP blocks or macros. Floorplanning also includes decisions on I/O pin placement and defining power domains.
-In power planning, a Power Distribution Network (PDN) is created to deliver clean power across the chip. The power rails and straps are usually placed on upper metal layers since they are thicker and have lower resistance, which helps reduce IR drop and ensures reliable power delivery.
-
-*Placement*
-
-Placement determines the exact physical location of standard cells within the defined floorplan. This process occurs in two phases:
-
-- Global Placement: Estimates optimal positions to reduce wirelength and congestion, but may not obey all design rules.
-
-- Detailed Placement: Adjusts the global result to ensure legal placement while minimizing additional wirelength or timing penalties.
-
-*Clock Tree Synthesis (CTS)*
-
-A clock tree is built to distribute the clock signal to all sequential elements (flip-flops) in the design. Since all flip-flops must receive the clock signal simultaneously to avoid timing violations like skew and jitter, structures such as H-trees or X-trees are used. CTS also buffers the clock signal and ensures balanced timing paths across different regions.
-
-*Routing*
-
-Routing connects the logically associated pins (nets) across the placed cells using horizontal and vertical metal layers defined in the PDK.
-
-- Global Routing identifies approximate routing paths.
-
-- Detailed Routing determines exact wiring with specific tracks, vias, and metal layers.
- 
-- The Sky130 PDK provides six metal layers, each with defined widths, spacings, pitches, and via rules to guide the router for legal and             manufacturable connections.
-
-*Verification Before Sign-off*
-
-Before the final design is ready for fabrication, several verification steps are required:
-
-- DRC (Design Rule Check): Ensures the physical layout complies with all foundry-imposed rules like minimum spacing, width, enclosure, etc.
-
-- LVS (Layout Versus Schematic): Compares the layout netlist against the schematic/netlist from the synthesis phase to confirm logical equivalence.
-
-- Timing Analysis: Static Timing Analysis (STA) verifies that all setup and hold time constraints are satisfied across all paths and corners         (process, voltage, temperature).
-The final Result is [GDSII file format.](https://anysilicon.com/semipedia/gdsii/)
-
-RTL to GDSII flow : [Openlane](https://efabless.com/openlane)
-
-## OpenLane Flow
-
-<img width="848" height="=500" alt="182759711-6b9352ec-7652-4589-af31-53a409eb2830" src="https://github.com/user-attachments/assets/f3cdde11-73e1-496e-9486-3d02f62ff65d"/>
-
-
-OpenLane is an automated RTL to GDSII flow that utilizes various components such as OpenROAD, Yosys, Magic, Netgen, and custom scripts for design exploration and optimization.
-
-The flow performs all ASIC implementation steps from RTL down to GDSII. OpenLane Interactive Mode Commands include a variety of functions such as setting the current netlist, running logic verification, setting the current def file, preparing lef files, preparing a liberty file, generating an exclude list file, sourcing configurations, specifying a path to save config_in.tcl, preparing a run, specifying a design folder, overwriting an existing run, specifying a path to save the run, specifying a name for a specific run, creating a tcl configuration file for a design, setting the verilog source code file, specifying the design's configuration file, setting a verbose output level, generating a padframe, saving views of a given run, changing save paths for various file types, labeling pins of a macro def, generating a verilog netlist from a def file, creating an obstruction, setting tracks on a layer, extracting core dimensions, running SPEF extraction and Static Timing Analysis, running antenna checks, saving environment variables, running OpenSTA timing analysis, checking for unmapped cells, checking for assign statements, and checking if the LEF was properly read.
-
-- *Antenna Rules Violation* : long wire segments will act as antennna and will accumulate charges, this might damage the connected transistor gates. Solution is to either use bridging or antenna diode insertion to leak away the charges.  
-### OpenLane Directory Hierarchy:
-
- 
-├── OOpenLane             -> directory where the tool can be invoked (run docker first)
-│   ├── designs          -> All designs must be extracted from this folder
-│   │   │   ├── picorv32a -> Design used as case study for this workshop
-│   |   |   ├── ...
-|   |   ├── ...
-├── pdks                 -> contains pdk related files 
-│   ├── skywater-pdk     -> all Skywater 130nm PDKs
-│   ├── open-pdks        -> contains scripts that makes the commerical PDK (which is normally just compatible to commercial tools) to also be compatible with the open-source EDA tool
-│   ├── sky130A          -> pdk variant made especially compatible for open-source tools
-│   │   │  ├── libs.ref  -> files specific to node process (timing lib, cell lef, tech lef) for example is `sky130_fd_sc_hd` (Sky130nm Foundry Standard Cell High Density)  
-│   │   │  ├── libs.tech -> files specific for the tool (klayout,netgen,magic...) 
-
-
-Inside a specific design folder contains a config.tcl which overrides the default settings on OpenLANE. These configurations are specific to a design (e.g. clock period, clock port, verilog files...). The priority order for the OpenLANE settings:
-1. sky130_xxxxx_config.tcl in OpenLane/designs/[design]/
-2. config.tcl in OpenLane/designs/[design]/
-3. Default values in OpenLane/configuration/
-
-
-
-### Lab [Day 1] - Determine Flip-flop Ratio:
+## Lab 1
+- Determine Flip-flop Ratio:
 The task is to find the flip-flop ratio ratio for the design picorv32a. This is the ratio of the number of flip flops to the total number of cells. For the OpenLane installation, the steps are very straight forward and can be found on the [OpenLane repo](https://github.com/The-OpenROAD-Project/OpenLane).
 
 *1. Run OpenLANE:*
- - $ make mount = Open the docker platform inside the openlane/
+ - $ make mount = Open the docker platform inside the openlane
  - % flow.tcl -interactive = run script for automating the whole RTL to GDSII flow but in step by step -interactive mode
  - % package require openlane 0.9 == retrives all dependencies for running v0.9 of OpenLANE  
  
@@ -290,31 +138,27 @@ Timing characterization
   If we zoom, we the core with all the standard cells placed in between power can ground rail
 
 # Day 3
-# Design a Library Cell using Magic Layout and Ngspice Characterization
+## Design a Library Cell using Magic Layout and Ngspice Characterization
 
-# CMOS Inverter Fabrication Process
+### CMOS Inverter Fabrication Process
 
 This document outlines the process flow for fabricating a CMOS inverter using standard bulk silicon technology.
 
----
 
-## 1. Substrate Selection
+### 1. Substrate Selection
 - **Material**: P-type silicon wafer (⟨100⟩ orientation)
 - **Resistivity**: 5–50 Ω·cm
 - **Key Note**: Substrate doping must be **less** than well doping.
 
----
 
-## 2. Active Region Isolation (LOCOS)
+### 2. Active Region Isolation (LOCOS)
 - **Mask 1**: Photoresist to define active areas
 - **Layers**:
   - Si₃N₄ (80 nm): Prevents oxide growth over active regions
   - Field Oxide (LOCOS): ~1 µm thick in exposed regions
 - **Outcome**: Isolated active regions for NMOS and PMOS
 
----
-
-## 3. Well Formation
+### 3. Well Formation
 - **N-Well (for PMOS)**:
   - **Mask 2**: Protects NMOS areas
   - **Implant**: Phosphorus @ 400 keV
@@ -324,9 +168,8 @@ This document outlines the process flow for fabricating a CMOS inverter using st
   - **Implant**: Boron @ 200 keV
   - **Drive-in**: Thermal diffusion to deepen wells
 
----
 
-## 4. Gate Formation
+### 4. Gate Formation
 - **Threshold Voltage Adjustments**:
   - **Mask 4**: Boron implant (for NMOS)
   - **Mask 5**: Arsenic implant (for PMOS)
@@ -337,9 +180,9 @@ This document outlines the process flow for fabricating a CMOS inverter using st
 - **Polysilicon Gate**:
   - **Mask 6**: Pattern poly-Si gates
 
----
 
-## 5. Lightly Doped Drain (LDD)
+
+### 5. Lightly Doped Drain (LDD)
 - **Purpose**: Reduce hot-carrier & short-channel effects
 - **Implants**:
   - **Mask 7**: N⁻ (Phosphorus) for NMOS
@@ -347,16 +190,16 @@ This document outlines the process flow for fabricating a CMOS inverter using st
 - **Sidewall Spacers**:
   - SiO₂ deposition + anisotropic etch
 
----
 
-## 6. Source/Drain Formation
+
+### 6. Source/Drain Formation
 - **Mask 9**: N⁺ implant (Arsenic) for NMOS
 - **Mask 10**: P⁺ implant (Boron) for PMOS
 - **Note**: Screen oxide used to prevent ion channeling
 
----
 
-## 7. Contacts & Local Interconnects
+
+### 7. Contacts & Local Interconnects
 - **TiN/TiSi₂ Formation**:
   - Ti sputtering → RTA @ 600–700°C
   - TiSi₂ for gate/source/drain
@@ -364,9 +207,9 @@ This document outlines the process flow for fabricating a CMOS inverter using st
 
 - **Mask 11**: Etch TiN for contacts
 
----
 
-## 8. Metallization (Al/W)
+
+### 8. Metallization (Al/W)
 - **Planarization**:
   - PSG deposition + CMP
 
@@ -376,9 +219,9 @@ This document outlines the process flow for fabricating a CMOS inverter using st
 
 - **Mask 16**: Pad opening for top-level contacts
 
----
 
-## 🔍 Key Insights
+
+##  Key Insights
 - PMOS width is 2–3× larger than NMOS for current balancing
 - LDD reduces leakage and improves reliability
 - Sidewall spacers protect LDD during S/D implantation
