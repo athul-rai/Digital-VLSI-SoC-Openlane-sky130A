@@ -39,7 +39,6 @@ OpenLANE orchestrates a suite of powerful EDA tools—including Yosys, OpenROAD,
   - [Lab](#Lab-3)
     - [Spice extraction of inverter in magic](#Spice-extraction-of-inverter-in-magic)
     - [Post-Layout Spice simulation (ngspice)](#Post-Layout-Spice-simulation-(ngspice))
-    - [Slew rate and Propagation delay](#Slew-rate-and-Propagation-delay)
     - [Fix Tech File DRC via Magic](#Fix-Tech-File-DRC-via-Magic)
       
 - [DAY 4](#DAY-4)
@@ -208,99 +207,31 @@ In Order to fix negetive slack we change the clock period to ```55.00``` in ```s
 <img width="848" height="255" alt="Screenshot 2025-07-24 131231" src="https://github.com/user-attachments/assets/ae72bbe7-8a79-40b1-80b4-6af999df93fb" />
 
 # Day 2 
-# Good Floorplan vs Bad Floorplan and Introduction to Library Cells
+##The following topics are addresed:
 
-#### Floorplan
+Floorplanning
+- Calculating utilization factor (area occupied by netlist / total area of core) and aspect ratio of the core (height/width)
+- Defining pre-placed cells location, which are placed before standard cells
+- Usage of decoupling capacitor to counter fluctuation of power delivered to cells and noise, which can cause undefined logic values and unstable circuit functioning
+- Power planning to provide power to cells
 
-- Determine Core and Die Dimensions
+Placement
+- Bind netlist to physical cells and determine size. On library, one can find same cells of different sizes depending on the needs of the circuit
+- Place the netlist on the core, respecting preplaced cells and finding the best locations to guarantee signal integrity and physical proximity to where the signals should travel
+- Place repeaters to strenghten signals of cells that are distant
 
-  - The core is the central area where logic blocks are placed.
+Cell design flow
+- Standard cells are kept at a library, such as AND, inverter, buffer, etc
+- For inputs of the flow: PDKs, DRC and LVS rules, SPICE models, library and uuser defined specs
+- It has some design steps: circuit design, layout and characterization
+- Then, for output, we get circuit description language (CDL) files, GDSII, LEF, extracted SPICE netlist (.cir), timing, noise, power libs and function
+- For the characterization flow, the cell's behavior should be analyzed under various conditions as to create implementation models
 
-  - Width and height depend on standard cell dimensions in the netlist.
-
-  - Utilization factor = (Area occupied by netlist) / (Total core area).
-
-  - Typically ranges between 0.5 to 0.6 (remaining space is for routing and additional cells).
-
-  - Aspect ratio = (Height / Width) of the core.
-
-  - An aspect ratio of 1 produces a square core.
-    <img width="848" height="367" alt="Screenshot 2025-07-24 223107" src="https://github.com/user-attachments/assets/92da74da-1a22-40b1-9b2e-09e5d11c03c7" />
-
-- Preplaced Cells (Macros/IPs)
-
-  - These are complex reusable blocks (e.g., memory, clock-gating cells, comparators).
-
-  - Their placement is user-defined and fixed before automated placement & routing.
-
-  - Automated tools cannot move preplaced cells after definition.
-    <img width="848" height="367" alt="Screenshot 2025-07-24 223127" src="https://github.com/user-attachments/assets/675fe99d-0725-4d39-ab18-e5d19f703447" />
-
-- Decoupling Capacitors
-
-  - Placed near preplaced cells to stabilize voltage supply.
-    
-    <img width="848" height="603" alt="Untitled" src="https://github.com/user-attachments/assets/c04cf8d8-f3de-49f7-bda0-91d5892b8fe5" />
-
-
-  - Reason: Long power supply wires cause voltage drop (IR drop) due to resistance/inductance.
-
-  - Solution: Decoupling capacitors provide localized current during switching, keeping voltage within noise margin.
-
-- Power Planning
-
-  - Decoupling capacitors alone are insufficient for full-chip power stability.
-
-  - Ground bounce: Excessive current sinking when many cells switch to '0'.
-
-  - Voltage droop: Insufficient current sourcing when many cells switch to '1'.
-
-  - Solution: Use a power mesh with multiple VDD/VSS taps across the chip for uniform current distribution.
-    <img width="848" height="371" alt="Screenshot 2025-07-24 222913" src="https://github.com/user-attachments/assets/4c943466-20cc-4e48-96ca-6c0bcdba10ab" />
-
-  
-
-- Pin Placement
-
-  - I/O ports are placed between the core and die boundary.
-
-  - Placement depends on connected cell locations in the core.
-
-  - Clock ports are thicker (low-resistance path) to ensure full-chip drive capability.
-
-  - Logical Cell Placement Blockage
-
-  - Ensures no cells are placed over die pin locations during automated placement/routing.
-
-  - Defined as blockage regions to prevent overlap.
-    <img width="848" height="355" alt="Screenshot 2025-07-24 222958" src="https://github.com/user-attachments/assets/aa9bb6ac-70b1-4a1e-a388-22b122db452f" />
-    <img width="848" height="347" alt="Screenshot 2025-07-24 223040" src="https://github.com/user-attachments/assets/0f4ab5a9-2147-4725-8bc1-e3412078ac7b" />
-
-
-#### Placement
-
-- Netlist Binding
-  - Netlist binding is the process of mapping the logical representation of a digital design onto standard cell shapes from a library. Each component in the netlist is mapped to a specific shape defined in the       library.
-
-- Initial Placement Design
-  In this phase, components from the netlist are placed within the chip's core area. Key considerations include:
-
-  - Proximity to Pins: Components are strategically placed based on their distance from input and output pins to minimize signal delays.
-
-  - Signal Optimization: Signals requiring rapid propagation, such as FF1 to FF2, are placed close together. Buffer cells may be added for signal integrity.
-
-  - Wire-Length and Capacitance Estimation: Wire length and capacitance estimates guide placement optimization, factoring in signal delay, power consumption, and integrity.
-
-- Final Placement Optimization
-  - The final placement phase fine-tunes the component layout within the chip, optimizing for performance. It assumes an ideal clock and aims to minimize signal delays, conserve power, and meet design                constraints.
-
-  - The next step in the Digital ASIC design flow after floorplanning is placement. The synthesized netlist has been mapped to standard cells and the floorplanning phase has determined the standard cells rows,       enabling placement.
-  
-  *OpenLane does placement in two stages:*
-
-  *Global Placement - Optimized but not legal placement. Optimization works to reduce wirelength by reducing half parameter wirelength
-  Detailed Placement - Legalizes placement of cells into standard cell rows while adhering to global placement*
-
+Timing characterization
+- One should note the various timing threshold definitions, such as the slew, how much time the cell takes to respond to an input and the corresponding outputs
+- The propagation delay is also crucial to compare how the output in a cell behaves to an input, as the different delays in communicating cells can cause unexpected results if not properly addressed
+- Transition time points at the slew time of inputs and outputs, calculated using the threshold values
+- The waveforms are a way for visualization of this step
 
 
 ## Lab 2 
@@ -358,243 +289,103 @@ In Order to fix negetive slack we change the clock period to ```55.00``` in ```s
   
   If we zoom, we the core with all the standard cells placed in between power can ground rail
 
-
-#### Library Characterization
-
-- Purpose:
-  
-  - Provides standard cells, macros, decaps for EDA tools.
-
-  - Cells come in different sizes, Vth, drive strengths.
-
-- Inputs (From Foundry PDK):
-  
-  ✔ DRC/LVS rules (manufacturability)
-  
-  ✔ SPICE models (transistor behavior)
-  
-  ✔ User specs (cell height, width, VDD, metal layers)
-
-- Cell Design Flow
-  
-  - Circuit Design → CDL netlist.
-
-  - Transistor Sizing → Meet speed/power needs.
-
-  - Layout → Stick diagram + Euler’s path (Magic tool).
-
-  - Outputs:
-
-    GDSII (layout)
-
-    LEF (dimensions, pins)
-
-    Extracted SPICE (parasitics)
-
-- Characterization (GUNA Tool):
-  
-  - Timing:
-
-    Slew (20%-80% rise/fall time).
-
-    Prop Delay (50% input → 50% output).
-
-    Power (leakage, dynamic).
-
-    Noise (crosstalk).
-
-- Key Notes:
-  
-    ⚠ Negative delay? → Fix threshold (use 50%).
-  
-   📌 Bigger cells = stronger drive but slower (higher Vth).
-
-  
-  <img width="848" height="603" alt="dadda" src="https://github.com/user-attachments/assets/a288d9cd-e1cc-4df1-bdf8-d5c77d97a7c4" />
 # Day 3
 # Design a Library Cell using Magic Layout and Ngspice Characterization
 
-#### Designing a Library Cell 
+# CMOS Inverter Fabrication Process
 
- **SPICE Deck for CMOS Inverter**  
+This document outlines the process flow for fabricating a CMOS inverter using standard bulk silicon technology.
 
-  - **Netlist** describing component connectivity.  
-  - **W/L** values:  
-    - `0.375u/0.25u` = Width=375nm, Length=250nm *(PMOS typically 2-3x wider than NMOS)*.  
-  - **Voltages**:  
-    - Gate supply (`Vin`): 2.5V *(scaled with length)*.  
-    - `Vdd`: 2.5V (PMOS source).  
-    - `0`: Ground (NMOS source).  
-  - **Capacitances**:  
-    - Load caps: `10ff` (attached to nodes).  
-  - **Nodes**:  
-    - Label connections (e.g., `Vin`, `Vdd`, `0`) for SPICE simulation.
-      
- **Description** : 
- 
- <img width="848" height="602" alt="Screenshot 2025-07-26 125422" src="https://github.com/user-attachments/assets/f647f49c-e4af-4a20-9eaf-dfa6f4d9f203" />
+---
 
- ```
- Syntax for the PMOS and NMOS descriptiom:
- [component name] [drain] [gate] [source] [substrate] [transistor type] W=[width] L=[length]
- 
- All components are described based on nodes and its values
- .op is the start of SPICE simulation operation where Vin will be sweep from 0 to 2.5 with 0.5 steps
- tsmc_025um_model.mod is the model file containing the technological parameters for the 0.25um NMOS and PMOS The steps to simulate in SPICE:
- ```
+## 1. Substrate Selection
+- **Material**: P-type silicon wafer (⟨100⟩ orientation)
+- **Resistivity**: 5–50 Ω·cm
+- **Key Note**: Substrate doping must be **less** than well doping.
 
- **Key Points**:  
-  - PMOS wider → balances current with NMOS.  
-  - Node naming essential for simulation.  
-  - Example: `M1` (PMOS) and `M2` (NMOS) form inverter.  
+---
 
+## 2. Active Region Isolation (LOCOS)
+- **Mask 1**: Photoresist to define active areas
+- **Layers**:
+  - Si₃N₄ (80 nm): Prevents oxide growth over active regions
+  - Field Oxide (LOCOS): ~1 µm thick in exposed regions
+- **Outcome**: Isolated active regions for NMOS and PMOS
+
+---
+
+## 3. Well Formation
+- **N-Well (for PMOS)**:
+  - **Mask 2**: Protects NMOS areas
+  - **Implant**: Phosphorus @ 400 keV
+
+- **P-Well (for NMOS)**:
+  - **Mask 3**: Protects PMOS areas
+  - **Implant**: Boron @ 200 keV
+  - **Drive-in**: Thermal diffusion to deepen wells
+
+---
+
+## 4. Gate Formation
+- **Threshold Voltage Adjustments**:
+  - **Mask 4**: Boron implant (for NMOS)
+  - **Mask 5**: Arsenic implant (for PMOS)
+
+- **Gate Oxide**:
+  - High-quality 10 nm SiO₂ (etch and regrow)
   
-  
-#### Follow these steps for simulation in ngspice :
- 
-  1. Source the circuit file in Ngspice using source <file_name>.cir.
-  2. Execute the simulations using the run command.
-  3. Use setplot to prepare for plotting.
-  4. For DC analysis (as indicated in the .cir file), use dc1 to prepare the DC plot.
-  5. Display available vectors using display.
-  6. Plot specific vectors, e.g., plot vout vs vin, to visualize the circuit behavior.
+- **Polysilicon Gate**:
+  - **Mask 6**: Pattern poly-Si gates
 
-*Vout vs Vin Plot :*
+---
 
-<img width="848" height="656" alt="Screenshot 2025-07-26 125706" src="https://github.com/user-attachments/assets/4e34ffd1-4c48-4ab0-b0fd-cba749e4df5a" />
+## 5. Lightly Doped Drain (LDD)
+- **Purpose**: Reduce hot-carrier & short-channel effects
+- **Implants**:
+  - **Mask 7**: N⁻ (Phosphorus) for NMOS
+  - **Mask 8**: P⁻ (Boron) for PMOS
+- **Sidewall Spacers**:
+  - SiO₂ deposition + anisotropic etch
 
-  
-<img width="848" height="648" alt="Screenshot 2025-07-26 125749" src="https://github.com/user-attachments/assets/a225d17d-3e87-4ea4-a6d9-4e5caf95988f" />
+---
 
+## 6. Source/Drain Formation
+- **Mask 9**: N⁺ implant (Arsenic) for NMOS
+- **Mask 10**: P⁺ implant (Boron) for PMOS
+- **Note**: Screen oxide used to prevent ion channeling
 
-- From the above we can see that the switching threshold of the latter is exactly midway with reference to Vdd and is slightly shifted to the left with the former
+---
 
-- At the Switching threshold pmos and nmos drain add up to zero. Using this condition and the Drain Current equation we can fix a value for W/L to obtain the required switching voltage
+## 7. Contacts & Local Interconnects
+- **TiN/TiSi₂ Formation**:
+  - Ti sputtering → RTA @ 600–700°C
+  - TiSi₂ for gate/source/drain
+  - TiN for local interconnects
 
-- To obtain a symmetric DC plot, you can scale the aspect ratio of PMOS by 2.5 times
+- **Mask 11**: Etch TiN for contacts
 
-#### SPICE Switching Threshold and Propagation Delay 
+---
 
-- Switching threshold = Vin is equal to Vout. This the point where both PMOS and NMOS is in saturation or kind of turned on, and leakage current is high. 
-                      If PMOS is thicker than NMOS, the CMOS will have higher switching threshold (1.2V vs 1V) while threshold will be lower when NMOS becomes thicker.
+## 8. Metallization (Al/W)
+- **Planarization**:
+  - PSG deposition + CMP
 
-- Propagation delay = rise or fall delay
+- **Contact Holes and Vias**:
+  - **Mask 12/14**: Via etching
+  - **Mask 13/15**: Metal (Al or W) deposition
 
+- **Mask 16**: Pad opening for top-level contacts
 
-```the line intersection is the switching threshold```
+---
 
-<img width="848" height="541" alt="Screenshot 2025-07-26 135748" src="https://github.com/user-attachments/assets/d3abddf5-db6a-448f-952e-b885b8568468" />
+## 🔍 Key Insights
+- PMOS width is 2–3× larger than NMOS for current balancing
+- LDD reduces leakage and improves reliability
+- Sidewall spacers protect LDD during S/D implantation
+- TiSi₂ lowers gate resistance; TiN supports routing
+- Total Masks: **16** (wells, gates, implants, contacts, metals)
 
-
-```transient analysis is used for finding propagation delay :```
-
-<img width="200" height="216" alt="Screenshot 2025-07-26 135659" src="https://github.com/user-attachments/assets/7ab2839f-d176-49b6-b1b5-30f36c04c5e2" />
-
-```
-Vin in 0 0 pulse 0 2.5 0 10p 10p 1n 2n 
-*** Simulation Command ***
-.op
-.tran 10p 4n
-```
-<img width="848" height="53" alt="Screenshot 2025-07-26 135650" src="https://github.com/user-attachments/assets/957730e3-5601-4bbc-a6d9-46503961e79a" />
-
-`starts at 0V`
-`ends at 2.5V`
-`starts at time 0`
-`rise time of 10ps`
-`fall time of 10ps`
-`pulse-width of 1ns`
-`period of 2ns`
-
-**SPICE transient analysis :**
-
-<img width="848" height="889" alt="187056370-18949899-a158-4307-96d9-d5c06bbeed66" src="https://github.com/user-attachments/assets/754e0757-5b33-494c-95ae-2a287599dc6d" />
-
-#### 16-Mask CMOS Process 
-*inverter*
-
-1. Substrate Selection
-   - P-type Si wafer (5–50 Ω·cm, ⟨100⟩ orientation).
-
-   - Key: Substrate doping < well doping.
-
-2. Active Region Isolation (LOCOS)
-   - Mask 1: Photoresist patterning to protect transistor regions.
-
-   - Layers:
-
-     - Si₃N₄ (80nm): Blocks SiO₂ growth.
-
-     - Field Oxide (LOCOS): Grows in unprotected areas (~1µm).
-
-   - Result: Isolated active regions for NMOS/PMOS.
-
-3. Well Formation
-   - N-well (PMOS):
-
-     - Mask 2: Protects NMOS region.
-
-     - Phosphorus implant @400 keV.
-
-   - P-well (NMOS):
-
-     - Mask 3: Protects PMOS region.
-
-     - Boron implant @200 keV.
-
-     - Drive-in diffusion to deepen wells.
-
-4. Gate Formation
-   - Threshold Voltage Control:
-
-     - Mask 4/5: Boron (NMOS) & Arsenic (PMOS) implants.
-
-     - Gate Oxide: Etch/regrow 10nm SiO₂ (high quality).
-
-     - Mask 6: Poly-Si gate patterning.
-
-5. Lightly Doped Drain (LDD)
-   - Purpose: Prevent hot-electron/short-channel effects.
-
-   - Mask 7: N⁻ implant (Phosphorus) for NMOS.
-
-   - Mask 8: P⁻ implant (Boron) for PMOS.
-
-   - Sidewall spacers: SiO₂ deposition + anisotropic etch.
-
-6. Source/Drain Formation
-   - Mask 9: N⁺ implant (Arsenic) for NMOS.
-
-   - Mask 10: P⁺ implant (Boron) for PMOS.
-
-   - Screen oxide prevents channeling.
-
-7. Contacts & Local Interconnects
-   - TiN/TiSi₂ Formation:
-
-     - Ti sputtering → RTA (600–700°C) → TiSi₂ (gates) + TiN (routing).
-
-   - Mask 11: Etch TiN for first-layer contacts.
-
-8. Metallization (Al/W)
-   - Planarization: PSG deposition + CMP.
-
-   - Contact Holes:
-
-     - Mask 12/14: Via etching.
-
-     - Mask 13/15: Aluminum/W deposition.
-
-   - Mask 16: Top-layer contact/pad opening.
-
-*Key Insights :*
-- PMOS Width > NMOS (2–3x) for current balancing.
-
-- LDD reduces leakage; Sidewall spacers protect LDD during S/D implants.
-
-- TiSi₂ lowers gate resistance; TiN aids local routing.
-
-- 16 masks cover wells, implants, gates, contacts, and metals.
+---
 
 Final Result : 
 
@@ -629,20 +420,6 @@ Final Result :
 
   <img width="848" height="487" alt="Screenshot 2025-07-31 160022" src="https://raw.githubusercontent.com/athul-rai/Digital-VLSI-SoC-Openlane-sky130A/main/Day3/Screenshot%202025-07-31%20160022.png" />
 
-  
-#### Slew rate and Propagation delay 
-
-- Rise Transition ```output transition time from 20%(0.66V) to 80%(2.64V)``` : 0.03581ns
-  ```(2.156 - 2.12019)```
-  <img width="848" height="78" alt="Screenshot 2025-07-26 213748" src="https://github.com/user-attachments/assets/02b52e5c-fff7-4283-8258-e47d702eabac" />
-
-- Fall Transition ```output transition time from 80%(2.64V) to 20%(0.66V)``` : 0.5969ns
-  <img width="848" height="77" alt="Screenshot 2025-07-26 214030" src="https://github.com/user-attachments/assets/b9a32895-a01c-4740-9f63-48f32acf497e" />
-
-- Rise delay ```delay between 50%(1.65V) of input to 50%(1.65V) of output``` : 0.0303ns
-  <img width="848" height="72" alt="Screenshot 2025-07-26 214545" src="https://github.com/user-attachments/assets/158e2eaf-4f69-4fbd-82bb-5b2c5814962d" />
-
-- Fall Delay ```delay between 50%(1.65V) of input to 50%(1.65V) of output``` : 0.0483ns
 
 #### Fix Tech File DRC via Magic
 
@@ -720,46 +497,27 @@ p-poly ↔ poly spacing
 
 ## Theory
 
-#### Delay Table
-
-To minimize clock skew between endpoints of a clock tree (preventing signal arrival at different times):
-
-- Equal capacitive load: Buffers at the same level must drive identical capacitive loads to ensure uniform timing delay (latency).
-
-- Uniform buffer sizing: Buffers on the same level must be the same size, as differing sizes lead to varying W/L ratios, resistances, and RC constants—resulting in    inconsistent delays.
-
-To minimize clock skew in a clock tree distribution network, buffers at the same hierarchical level must maintain identical capacitive loads and uniform buffer sizes to ensure consistent propagation delays across all branches. While different levels may employ varying buffer sizes and drive different capacitive loads, the symmetric matching of these characteristics within each level guarantees balanced cumulative delays along all clock paths, effectively eliminating skew. The timing behavior of these buffer cells is characterized through delay tables in liberty files, where the primary delay component - output slew - is determined by both the output capacitive load and input transition time. This input transition time itself depends on the preceding buffer's output characteristics and its own transition delay properties, creating a cascaded timing relationship that must be carefully modeled for accurate skew prediction and control.
-
-<img width="1166" height="635" alt="Screenshot 2025-07-30 223725" src="https://github.com/user-attachments/assets/15e6a690-8f95-41c5-8027-a0e04d836538" />
-
-#### Timing Analysis (using Ideal Clocks)
-
-During pre-layout static timing analysis (STA), the verification is performed using ideal clock models that do not yet account for the physical implementation effects. At this stage, the analysis excludes both clock buffer delays and net delays caused by RC parasitics, as the complete routing information is not yet available. Instead, wire delay estimates are derived from the process design kit (PDK) library wire models, which provide approximate interconnect characteristics based on technology parameters. This idealized approach enables early timing verification before physical implementation, but requires subsequent post-layout STA to validate timing with actual buffer insertion and extracted parasitic RC values from the final layout.
-
-#### Clock Tree Synthesis Stage
-
-When constructing a clock tree, three critical parameters must be addressed: (1) Clock skew minimization requires balanced clock tree structures that ensure equal wire lengths and matching delays to all endpoints, guaranteeing synchronous signal arrival. (2) Clock signal integrity demands careful slew rate control through specialized clock buffers that maintain symmetrical rise/fall times, compensating for RC degradation along interconnect routes. (3) Crosstalk prevention necessitates strategic shielding of clock nets, typically achieved by routing power (VDD) or ground lines adjacent to clock signals to break parasitic coupling capacitances with neighboring aggressor nets; this shielding methodology may also be applied to other timing-critical signal paths. Together, these techniques ensure robust clock distribution with minimal timing variation, proper signal quality, and reduced noise coupling throughout the clock network.
-
-<img width="676" height="457" alt="Screenshot 2025-07-30 224543" src="https://github.com/user-attachments/assets/765ab7fb-20ea-40a2-a724-032cb203e7ad" />
-
+The following topics are addresed:
+- Creation of LEF file of the previously opened inverter to be used on the PicoRV32 design
+- Analysis of the grid layout in Magic
+- How to make the CTS power aware? Using logic gates that can block the clock from propagating. However, the delay needs to be studied by a delay table
+- FFs need a setup time depending on the combinational logic present. They are also prone to uncertainty of the clock and jittering, which should be calculated and taken into account. Based on the characteristics of the circuit, the clock needs to be calculated thinking of the uncertainty and delays
+- A good strategy to route a clock tree is using the H-tree approach, as it's able to balance the clock time and is good for scaling designs
+- Crosstalk of the signals should be avoided, and the clock net shielding is good to remove internal capacitances that might affect the signals
+- Since there are many buffers in the clock tree, the time required for the clock to reach from a launch FF to a capture FF needs to take those middle buffer delays in consideration
+- Examples of setup and hold analysis using real clocks were shown and discussed
 
 ## Lab 4
 
 - Tracks.info used in routing stage (`/desktop/work/tools/openlane_working_dir/pdks/sky130A/libs.tech/openlane/sky130_fd_sc_hd`)
 
-  <img width="848" height="496" alt="Screenshot 2025-07-30 000535" src="https://github.com/user-attachments/assets/5b0f8ca6-d1d9-4205-afaa-3d4e0c39272e" />
+  <img width="848" height="496" alt="CMOS Inverter Layout" src="https://github.com/athul-rai/Digital-VLSI-SoC-Openlane-sky130A/blob/main/Day4/111.png?raw=true" />
 
-  <img width="848" height="490" alt="Screenshot 2025-07-30 000549" src="https://github.com/user-attachments/assets/bbf1a286-b4cd-44bf-a572-249b2c87fe0e" />
-
-  <img width="848" height="417" alt="Screenshot 2025-07-30 113158" src="https://github.com/user-attachments/assets/b6e985f8-a29b-477c-806a-c1da7bda2ab1" />
-
-  
+  <img width="848" height="490" alt="CMOS Inverter Output Waveform" src="https://github.com/athul-rai/Digital-VLSI-SoC-Openlane-sky130A/blob/main/Day4/112-3.png?raw=true" />
 - Type the Command in tkcon window to set grid as tracks of locali layer
    ```grid 0.46um 0.34um 0.23um 0.17um```
 
-  <img width="848" height="848" alt="Screenshot 2025-07-28 121258" src="https://github.com/user-attachments/assets/cc10810e-5776-436d-a05d-44b4b84273b9" />
-
-  <img width="848" height="608" alt="Screenshot 2025-07-27 011229" src="https://github.com/user-attachments/assets/5c5bc380-b802-41c4-b1a4-0f610579fcf9" />
+ <img width="848" height="608" alt="CMOS Inverter Timing Diagram" src="https://github.com/athul-rai/Digital-VLSI-SoC-Openlane-sky130A/blob/main/Day4/115.png?raw=true" />
 
 - Two Things to verify : Pins lies on intersections and cell width is 3. We can make use of grids to identify cell width.
 
@@ -770,17 +528,16 @@ When constructing a clock tree, three critical parameters must be addressed: (1)
   - save the inverter by your custom name save `sky130_vsdinv.mag`
     then type `lef write` in tkcon window. This will create files as shown below.
     
-    <img width="848" height="146" alt="Screenshot 2025-07-27 015605" src="https://github.com/user-attachments/assets/ae0c769f-27b8-4342-84ce-398afc2b430d" />
-    <img width="848" height="145" alt="Screenshot 2025-07-30 130455" src="https://github.com/user-attachments/assets/a75274fc-1505-4900-a4a6-2f0cd839281c" />
+    <img width="848" height="146" alt="CMOS Inverter Netlist or Logs" src="https://github.com/athul-rai/Digital-VLSI-SoC-Openlane-sky130A/blob/main/Day4/116-7.png?raw=true" />
+    
     
 
 - Pluging-in Custom Inverter Cell into Openlane
 
   - Copy the LEF file `sky130_vsdinv.lef` and `sky130_fd_sc_hd__*` from `openlane/vsdstdcelldesign/libs` to `picorv32a/src` directory.
- 
-    <img width="848" height="292" alt="Screenshot 2025-07-27 112459" src="https://github.com/user-attachments/assets/cd356fb9-25aa-4665-b87b-1e17dc3b5659" />
 
-    <img width="848" height="267" alt="Screenshot 2025-07-30 113419" src="https://github.com/user-attachments/assets/5022ddbe-00f2-4f35-babc-350cc474992e" />
+
+    <img width="848" height="267" alt="Final CMOS Inverter GDSII View" src="https://github.com/athul-rai/Digital-VLSI-SoC-Openlane-sky130A/blob/main/Day4/118.png?raw=true" />
 
  
   - add these commands into `config.tcl` in `Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a`
@@ -793,97 +550,93 @@ When constructing a clock tree, three critical parameters must be addressed: (1)
     set ::env(EXTRA_LEFS) [glob $::env(OPENLANE_ROOT)/designs/$::env(DESIGN_NAME)/src/*.lef]
     ```
     
-    <img width="848" height="582" alt="Screenshot 2025-07-30 004441" src="https://github.com/user-attachments/assets/db94ac64-9f76-400c-83bc-161d92eb155d" />
+   <img width="848" height="582" alt="CMOS Inverter Schematic or Layout Result" src="https://github.com/athul-rai/Digital-VLSI-SoC-Openlane-sky130A/blob/main/Day4/119.png?raw=true" />
 
   - Run docker and prepare the design picorv32a. You may make use of overwrite command : `prep -design picorv32a -tag <date> -overwrite`
  
-    <img width="848" height="902" alt="Screenshot 2025-07-30 131638" src="https://github.com/user-attachments/assets/516d4ac8-968c-4285-9784-cfb003c45fed" />
+    <img width="848" height="902" alt="Final CMOS Inverter Summary or Report" src="https://github.com/athul-rai/Digital-VLSI-SoC-Openlane-sky130A/blob/main/Day4/120.png?raw=true" />
 
-
-  - setting lefs
-
-    <img width="1697" height="892" alt="Screenshot 2025-07-30 132028" src="https://github.com/user-attachments/assets/647d1896-6a85-48f4-92e6-a4985aa4c76c" />
-
- 
-    ```
-    set lefs [glob $::env(DESIGN_DIR)/src/*.lef]
-    add_lefs -src $lefs
-    ```
-    
   - running synthesis ```run_synthesis```
  
-    <img width="848" height="481" alt="Screenshot 2025-07-28 130724" src="https://github.com/user-attachments/assets/bd6f4d92-62b0-427f-badd-2cc9968b03a4" />
+    <img width="848" height="481" alt="Timing Report or STA Result" src="https://github.com/athul-rai/Digital-VLSI-SoC-Openlane-sky130A/blob/main/Day4/121.png?raw=true" />
  
-    <img width="848" height="387" alt="Screenshot 2025-07-30 115338" src="https://github.com/user-attachments/assets/7a3485fb-6d89-40cc-84f6-17800e613640" />
- 
-    <img width="848" height="897" alt="Screenshot 2025-07-28 222817" src="https://github.com/user-attachments/assets/84f09731-1370-4d3c-b9c8-409273ba04f7" />
+    <img width="848" height="897" alt="Power Report or Analysis Result" src="https://github.com/athul-rai/Digital-VLSI-SoC-Openlane-sky130A/blob/main/Day4/122.png?raw=true" />
  
     we get to see --> chip area, wns (worst timing violation) and tns (total negative slack)
 
     merged.lef in tmp directory with our custom inverter as macro
     
-    <img width="848" height="497" alt="Screenshot 2025-07-28 134549" src="https://github.com/user-attachments/assets/c044a361-b554-41d6-a30f-f4d218789c12" />
-
-
-- we change some variable to get better timing improvement. This results change in chip area.so we'll change some variables because Those timing values aren't          ideal.
-
-    ```
-    echo $::env(SYNTH_STRATEGY)
-    
-    set ::env(SYNTH_STRATEGY) "DELAY 3"
-
-    echo $::env(SYNTH_BUFFERING)
-    // make sure its enabled i.e 1
-
-    echo $::env(SYNTH_SIZING)
-   
-    set ::env(SYNTH_SIZING) 1
-
-    echo $::env(SYNTH_DRIVING_CELL
-    // check whether it's the proper cell or not
-
-    run_synthesis
-    
-    ```
+    <img width="848" height="497" alt="Post-Layout Simulation Results" src="https://github.com/athul-rai/Digital-VLSI-SoC-Openlane-sky130A/blob/main/Day4/123.png?raw=true" />
 
     <img width="848" height="921" alt="Screenshot 2025-07-28 223452" src="https://github.com/user-attachments/assets/354f77d9-484b-4fc9-82db-f98ba83e714f" />
 
-    <img width="848" height="905" alt="Screenshot 2025-07-28 225050" src="https://github.com/user-attachments/assets/8fd2aa54-a14f-4a08-9c63-2e0da79a209a" />
-
-    values area has increased and worst negative slack has become 0
-
 - run floorplan
 
-  <img width="1847" height="883" alt="Screenshot 2025-07-28 225444" src="https://github.com/user-attachments/assets/9c38515d-dcd4-43cb-93d8-db4e18e8d09e" />
-
-  we get error
-
-  <img width="1847" height="883" alt="Screenshot 2025-07-28 225444" src="https://github.com/user-attachments/assets/2e5e7292-a69f-4646-9e8a-3f35f27d626a" />
-
-  run these commands instead :
-
-  ```
-  init_floorplan
-  place_io
-  tap_decap_or
-  ```
-
-- run placement and we obtain `DEF` file
-  opening the file using magic by command --> `magic -T /home/vsduser/Desktop/work/tools/openlane_working_dir/pdks/sky130A/libs.tech/magic/sky130A.tech lef read        ../../tmp/merged.lef def read picorv32a.placement.def &`
+  <img width="1847" height="1200" alt="Screenshot 2025-07-28 225444" src="https://github.com/user-attachments/assets/2e5e7292-a69f-4646-9e8a-3f35f27d626a" />
 
   <img width="1832" height="245" alt="Screenshot 2025-07-30 124909" src="https://github.com/user-attachments/assets/cd4713c1-b98b-4fcd-b906-30b1b344b2a8" />
 
-  <img width="1438" height="740" alt="Screenshot 2025-07-30 125132" src="https://github.com/user-attachments/assets/db8a2104-c693-4c8c-ae57-b77b073c9139" />
+- Post-Synthesis timing analysis
 
-  <img width="1441" height="738" alt="Screenshot 2025-07-29 010515" src="https://github.com/user-attachments/assets/3d0ac85a-1153-45a3-aff5-97221c0888b9" />
+  Since we are having improved timing of 0 wn. so what we will do is we will do timing analysis on Synthesis that has lot of violations
+  - we gradually improve and reduce our slack by replacing cells with better one and to deliver improved delay.
+  This is **timing ECO fixes**
 
-  <img width="1505" height="782" alt="Screenshot 2025-07-29 010553" src="https://github.com/user-attachments/assets/9461a51c-4038-4e8f-ad4a-088adf6a8967" />
+  First we do is running the synthesis --> include newly added lef to openlane flow --> set ::env(SYNTH_SIZING) 1 --> set                ::env(SYNTH_MAX_FANOUT) 4 --> run_synthesis
 
+  <img width="1848" height="902" alt="Screenshot 2025-07-31 191742" src="https://github.com/user-attachments/assets/3d42043d-4758-4577-ae4b-c14846e44257" />
+  
 
+  Later in `cd Desktop/work/tools/openlane_working_dir/openlane` we write command `sta pre_sta.conf`
 
+  *sta pre_sta.conf*
+  <img width="1838" height="901" alt="Screenshot 2025-07-31 211105" src="https://github.com/user-attachments/assets/ee021675-c15d-46ad-b587-43b0a22ccf3f" />
+
+  *my_base.sdc*
+  <img width="1832" height="891" alt="Screenshot 2025-07-31 211155" src="https://github.com/user-attachments/assets/2c6e2506-2d8f-4049-ad3a-d95f4fafeec8" />
+
+  <img width="1433" height="756" alt="Screenshot 2025-07-31 191954" src="https://github.com/user-attachments/assets/0893743c-bb30-450a-9620-e1d8b62fa90b" />
+
+  <img width="1817" height="908" alt="Screenshot 2025-07-31 192011" src="https://github.com/user-attachments/assets/b17625a1-252e-4413-befd-2b22a3379632" />
+
+  Replacing some cells to reduce slack
+
+  <img width="1855" height="437" alt="Screenshot 2025-07-31 202908" src="https://github.com/user-attachments/assets/73c52399-6aae-4cce-bd09-1e93e5eadfda" />
+
+  report_net -connections _11672_ [we see the driver pins] 
+  <img width="1857" height="910" alt="Screenshot 2025-07-31 203237" src="https://github.com/user-attachments/assets/5f8240b5-57a3-4f99-84f6-3ab736b991f4" />
+
+  replace_cell _14510_ sky130_fd_sc_hd__or3_4 [we replace some cells with better suited ones for driving 4 fanouts]
+  <img width="1847" height="921" alt="Screenshot 2025-07-31 203516" src="https://github.com/user-attachments/assets/affa5a5a-3594-4d79-9f75-0cf3bf84f6e7" />
+
+  To check the report and see the changes in slack we use command : report_checks -fields {net cap slew input_pins} -digits 4
+
+  Slack reduced
+
+  <img width="1841" height="905" alt="Screenshot 2025-07-31 203603" src="https://github.com/user-attachments/assets/38e44c1a-927a-47ec-8eec-e10d63772ddc" />
+
+  report_checks -from _29052_ -to _30440_ -through _14510_
+  <img width="1842" height="912" alt="Screenshot 2025-07-31 204342" src="https://github.com/user-attachments/assets/747b907d-20f5-44fa-9665-31cadfd64629" />
+
+  <img width="1852" height="916" alt="Screenshot 2025-07-31 204533" src="https://github.com/user-attachments/assets/5e3f3cc8-b68e-4948-909c-57ace47adec3" />
+
+  report_net -connections _11668_
+  
+  replace_cell _14506_ sky130_fd_sc_hd__or4_4
+
+  <img width="1855" height="645" alt="Screenshot 2025-07-31 205421" src="https://github.com/user-attachments/assets/bb689f1d-315f-476a-8b97-14916f3b0c5e" />
+
+  Slack Reduced
+
+  <img width="1853" height="880" alt="Screenshot 2025-07-31 205436" src="https://github.com/user-attachments/assets/6610dbe3-72fb-4f44-ac34-efcfef1c67b7" />
+
+  Intially : -23.90
+  
+  now : -22.9860
 - Run CTS
-
-  run synthesis,floorplan,placement and then run cts (`run_cts`)
+  
+  - Here we proceed with earlier 0 violation design. we want to proceed with the clean design to further stage.
+  - run synthesis,floorplan,placement and then run cts (`run_cts`)
 
   <img width="1297" height="457" alt="Screenshot 2025-07-29 181220" src="https://github.com/user-attachments/assets/1cb63874-68e5-4fba-a84f-a27dcec9eb0b" />
 
@@ -1017,7 +770,7 @@ When constructing a clock tree, three critical parameters must be addressed: (1)
   ```
   cd Desktop/work/tools/SPEF_EXTRACTOR
   
-  python3 main.py /home/vsduser/Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/runs/26-03_08-45/tmp/merged.lef                                     /home/vsduser/Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/runs/26-03_08-45/results/routing/picorv32a.def
+  python3 main.py /home/vsduser/Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/runs/<date>/tmp/merged.lef      /home/vsduser/Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/runs/<date>/results/routing/picorv32a.def
   ```
   
 - Post-Route OpenSTA timing analysis
@@ -1052,6 +805,12 @@ The GDSII file is generated in the `results/magic` directory
 
 **[GDSII](https://en.wikipedia.org/wiki/GDSII)**
 
+
+# Acknowledgements
+
+[Kunal Ghosh](https://github.com/kunalg123) – Founder, VLSI System Design Corp.
+
+[Nickson Jose](https://github.com/nickson-jose)– Developer & Contributor, Open Source Physical Design
 
 
      
