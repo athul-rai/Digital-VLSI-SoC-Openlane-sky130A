@@ -633,36 +633,29 @@ The following topics are addresed:
   
   now : -22.9860
 - Run CTS
-  
-  - Here we proceed with earlier 0 violation design. we want to proceed with the clean design to further stage.
+- 
   - run synthesis,floorplan,placement and then run cts (`run_cts`)
 
-  <img width="1297" height="457" alt="Screenshot 2025-07-29 181220" src="https://github.com/user-attachments/assets/1cb63874-68e5-4fba-a84f-a27dcec9eb0b" />
+  <img width="1297" height="457" alt="OpenLane Flow Completion Screenshot" src="https://github.com/athul-rai/Digital-VLSI-SoC-Openlane-sky130A/blob/main/Day4/140.png?raw=true" />
 
-  <img width="1847" height="272" alt="Screenshot 2025-07-29 181247" src="https://github.com/user-attachments/assets/7573ef66-934f-45e7-8193-366e2c699ff4" />
+  <img width="1847" height="272" alt="OpenLane Run Summary Banner" src="https://github.com/athul-rai/Digital-VLSI-SoC-Openlane-sky130A/blob/main/Day4/141.png?raw=true" />
   
 
 - Post-CTS Timing analysis : OpenROAD
 
   command : `openroad`
 
-  <img width="1257" height="480" alt="Screenshot 2025-07-29 181627" src="https://github.com/user-attachments/assets/4123c22c-b05e-457c-a5f0-804acaad7fc8" />
+  <img width="1257" height="480" alt="OpenLane Detailed Run Output" src="https://github.com/athul-rai/Digital-VLSI-SoC-Openlane-sky130A/blob/main/Day4/142.png?raw=true" />
 
-  <img width="1841" height="620" alt="Screenshot 2025-07-29 181808" src="https://github.com/user-attachments/assets/7d40a9ad-701b-4e1f-8449-5c060cdf403c" />
+ <img width="1841" height="620" alt="OpenLane Final Analysis Report" src="https://github.com/athul-rai/Digital-VLSI-SoC-Openlane-sky130A/blob/main/Day4/143.png?raw=true" />
+  
+  removing 'sky130_fd_sc_hd__clkbuf_1 and running CTS 
 
-  <img width="1847" height="908" alt="Screenshot 2025-07-29 181832" src="https://github.com/user-attachments/assets/2f8ed163-c532-491e-906b-cad0c448fc34" />
-
-  <img width="1830" height="878" alt="Screenshot 2025-07-29 181916" src="https://github.com/user-attachments/assets/1e754cbe-4c97-479c-bcce-e9beb3ce3154" />
-
-  removing 'sky130_fd_sc_hd__clkbuf_1 and running CTS again 
-
-  <img width="1852" height="907" alt="Screenshot 2025-07-29 182340" src="https://github.com/user-attachments/assets/e4d7ed6d-9bc7-4d7a-975e-4a574397192c" />
-
-  <img width="1518" height="655" alt="Screenshot 2025-07-30 222049" src="https://github.com/user-attachments/assets/3a085a95-c2b1-493c-8b05-0ca7bbe19744" />
+ <img width="1518" height="655" alt="OpenLane Detailed Analysis" src="https://github.com/athul-rai/Digital-VLSI-SoC-Openlane-sky130A/blob/main/Day4/144.png?raw=true" />
   
   echo $::env(CTS_CLK_BUFFER_LIST) [Checking current value of CTS_CLK_BUFFER_LIST]
 
-  <img width="1518" height="655" alt="Screenshot 2025-07-30 222049" src="https://github.com/user-attachments/assets/3a085a95-c2b1-493c-8b05-0ca7bbe19744" />
+  <img width="1518" height="655" alt="OpenLane Detailed Analysis 2" src="https://github.com/athul-rai/Digital-VLSI-SoC-Openlane-sky130A/blob/main/Day4/145.png?raw=true" />
 
   running openROAD command again
   
@@ -694,13 +687,12 @@ The following topics are addresed:
 
   report_clock_skew -setup
   ```
-  
-  <img width="1848" height="916" alt="Screenshot 2025-07-29 183123" src="https://github.com/user-attachments/assets/d270f744-9aec-439a-b537-3e5fb5a04a9a" />
+  <img width="1848" height="916" alt="OpenLane Final Detailed Report" src="https://github.com/athul-rai/Digital-VLSI-SoC-Openlane-sky130A/blob/main/Day4/146.png?raw=true" />
 
-  <img width="1337" height="740" alt="Screenshot 2025-07-30 220638" src="https://github.com/user-attachments/assets/f89677be-3220-45dc-8868-1bde680a25e1" />
+  <img width="1337" height="740" alt="OpenLane Run Results Overview" src="https://github.com/athul-rai/Digital-VLSI-SoC-Openlane-sky130A/blob/main/Day4/147.png?raw=true" />
 
   Checking clock skew for setup and hold
-  <img width="1852" height="945" alt="Screenshot 2025-07-29 183410" src="https://github.com/user-attachments/assets/5b3b741f-fc9e-40d4-9720-3ff3ae5cf279" />
+  <img width="1852" height="945" alt="OpenLane Timing and Power Report" src="https://github.com/athul-rai/Digital-VLSI-SoC-Openlane-sky130A/blob/main/Day4/148.png?raw=true" />
 
 
 
